@@ -13,7 +13,10 @@ class HTMLNode():
     def props_to_html(self):
         if self.props is None:
             return ""
-        return " ".join(f'{k}="{v}"' for k,v in self.props.items())
+        props = ""
+        for k,v in self.props.items():
+            props += f' {k}="{v}"'
+        return props
 
 class LeafNode(HTMLNode):
     def __init__(self, tag=None, value=None, props: dict = None) -> None:
@@ -24,10 +27,18 @@ class LeafNode(HTMLNode):
         if self.tag is None:
             return self.value
         else:
-            return self.create_tag()
-    def create_tag(self):
-        return f'<{self.tag}{" " if self.props is not None else ""}{self.props_to_html()}>{self.value}</{self.tag}>'
+            return f'<{self.tag}{self.props_to_html()}>{self.value}</{self.tag}>'
 
+class ParentNode(HTMLNode):
+    def __init__(self, tag=None, children=None, props: dict = None) -> None:
+        super().__init__(tag, None, children, props)
+    def to_html(self):
+        if self.tag is None:
+            raise ValueError("All parent nodes must have a tag.")
+        if self.children is None:
+            raise ValueError("All parent nodes must have children.")
+        children_html ="".join([child.to_html() for child in self.children])
+        return f'<{self.tag}{self.props_to_html()}>{children_html}</{self.tag}>'
 
 def main():
     node = HTMLNode("a","google",[],
@@ -45,6 +56,18 @@ def main():
     leaf2 = LeafNode("a", "Click me!", {"href": "https://www.google.com"})
     print(leaf2)
     print(leaf2.to_html())
+
+    node = ParentNode(
+        "p",
+        [
+            LeafNode("b", "Bold text"),
+            LeafNode(None, "Normal text"),
+            LeafNode("i", "italic text"),
+            LeafNode(None, "Normal text"),
+        ],
+    )
+
+    print(node.to_html())
 
 if __name__=="__main__":
     main()
