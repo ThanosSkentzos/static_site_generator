@@ -1,6 +1,6 @@
 import unittest
 
-from funtions import split_nodes_delimiter, text_node_to_html_node
+from funtions import extract_markdown_images, extract_markdown_links, split_nodes_delimiter, text_node_to_html_node
 
 from textnode import (
     TextNode,
@@ -51,6 +51,17 @@ class TestSplitDelimiter(unittest.TestCase):
         new_nodes = split_nodes_delimiter([node], "*", text_type_italic)
         self.assertEqual(repr(new_nodes),"[TextNode(This is text with a , text, None), TextNode(italic block, italic, None), TextNode( word, text, None)]")
 
+class TestRegEx(unittest.TestCase):
+    image_text = "This is text with a ![rick roll](https://i.imgur.com/aKaOqIh.gif) and ![obi wan](https://i.imgur.com/fJRm4Vk.jpeg)"
+    link_text = "This is text with a link [to boot dev](https://www.boot.dev) and [to youtube](https://www.youtube.com/@bootdotdev)"
+    def test_markdown_images(self):
+        expected=[("rick roll", "https://i.imgur.com/aKaOqIh.gif"), ("obi wan", "https://i.imgur.com/fJRm4Vk.jpeg")]
+        result = extract_markdown_images(self.image_text)
+        self.assertListEqual(expected,result)
+    def test_markdown_link(self):
+        expected = [("to boot dev", "https://www.boot.dev"), ("to youtube", "https://www.youtube.com/@bootdotdev")]
+        result = extract_markdown_links(self.link_text)
+        self.assertListEqual(expected,result)
 
 if __name__ == "__main__":
     unittest.main()
