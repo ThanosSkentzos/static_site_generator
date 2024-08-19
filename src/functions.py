@@ -12,8 +12,8 @@ from textnode import (
 )
 
 delim_to_text_type = {
-    '*':text_type_italic,
     '**':text_type_bold,
+    '*':text_type_italic,
     '`':text_type_code}
 
 
@@ -34,12 +34,22 @@ def text_node_to_html_node(text_node):
     else:
         raise ValueError(f"invalid text_type {text_node.text_type}")
 
+def generate_splitter(delimiter):
+    def split_on_delimiter(nodes):
+        return split_nodes_delimiter(nodes,delimiter,delim_to_text_type[delimiter])
+    return split_on_delimiter
+
+split_bold = generate_splitter("**")
+split_ital = generate_splitter("*")
+split_code = generate_splitter("`")
+
+
 def split_nodes_delimiter(old_nodes, delimiter, text_type):
     new_nodes=[]
     if delimiter not in delim_to_text_type:
-        raise ValueError("Invalid delimiter value")
+        raise ValueError(f"Invalid delimiter value: {delimiter}")
     for node in old_nodes:
-        if node.text_type != "text":
+        if node.text_type != text_type_text:
             new_nodes.append(node)
         else:
             #find new nodes from textnode
@@ -48,10 +58,16 @@ def split_nodes_delimiter(old_nodes, delimiter, text_type):
             if num_delimiter_found%2!=0:
                 raise Exception("Invalid Markdown Syntax")
             else:
-                return split_delimiters(text,delimiter)
+                node_split = split_delimiters(text,delimiter)
+                new_nodes += node_split
+    return new_nodes
+
 def split_nodes_image(old_nodes):
     nodes = []
     for node in old_nodes:
+        if node.text_type != "text":
+            nodes.append(node)
+            continue
         text = node.text
         img_tuples = extract_markdown_images(text)
         if len(img_tuples)==0:
@@ -73,10 +89,14 @@ def split_nodes_image(old_nodes):
 def split_nodes_link(old_nodes):
     nodes = []
     for node in old_nodes:
+        if node.text_type != text_type_text:
+            nodes+= [node]
+            continue
         text = node.text
         link_tuples = extract_markdown_links(text)
         if len(link_tuples)==0:
             nodes += [TextNode(text,text_type_text)]
+            continue
         remaining_text = text
         c = 0
         for t in link_tuples:
@@ -92,7 +112,6 @@ def split_nodes_link(old_nodes):
         if len(remaining_text)>0:
             nodes += [TextNode(remaining_text,text_type_text)]
     return nodes
-
 
 def split_delimiters(text,delim) -> list[TextNode]:
     if len(text)==0:
@@ -114,13 +133,19 @@ def extract_markdown_images(text):
 def extract_markdown_links(text):
     return re.findall(r"(?<!!)\[(.*?)\]\((.*?)\)",text)
 
+def text_to_textnodes(text):
+    nodes = [TextNode(text,text_type_text)]
+    nodes = split_nodes_image(nodes)
+    nodes = split_nodes_link(nodes)
+    nodes = split_bold(nodes)
+    nodes = split_ital(nodes)
+    nodes = split_code(nodes)
+    return nodes
+
 
 def main():
-    node = TextNode(
-        "This is text with an ![image](https://i.imgur.com/zjjcJKZ.png) and another ![second image](https://i.imgur.com/3elNhQu.png)",
-        text_type_text,
-    )
-    new_nodes = split_nodes_image([node])
+    text = "This is **text** with an *italic* word and a `code block` and an ![obi wan image](https://i.imgur.com/fJRm4Vk.jpeg) and a [link](https://boot.dev)"
+    new_nodes = text_to_textnodes(text)
     print(new_nodes)
 if __name__=="__main__":
     main()
