@@ -1,6 +1,6 @@
 import unittest
 
-from textnode import TextNode, split_nodes_delimiter,text_node_to_html_node
+from funtions import split_nodes_delimiter, text_node_to_html_node
 
 from textnode import (
     TextNode,
@@ -10,7 +10,6 @@ from textnode import (
     text_type_code,
     text_type_image,
     text_type_link,
-    text_node_to_html_node,
 )
 
 class TestTextNodeToHTMLNode(unittest.TestCase):

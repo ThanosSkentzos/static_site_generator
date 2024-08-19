@@ -8,10 +8,9 @@ from textnode import (
     text_type_code,
     text_type_image,
     text_type_link,
-    text_node_to_html_node,
 )
 class TestTextNode(unittest.TestCase):
-    def test_eq(self):
+    def test_eq_bold(self):
         node = TextNode("This is a text node", "bold")
         node2 = TextNode("This is a text node", "bold")
         self.assertEqual(node, node2)
