@@ -1,6 +1,7 @@
 import unittest
 
-from markdown import block_to_block_type, markdown_to_blocks
+from htmlnode import HTMLNode, LeafNode
+from markdown import block_to_block_type, markdown_to_blocks, markdown_to_html_node
 
 class TestMarkdown(unittest.TestCase):
     def test_props_to_html(self):
@@ -107,3 +108,44 @@ class TestBlockTypes(unittest.TestCase):
         expect = BlockTypes.ordered_list
         result = block_to_block_type(block)
         self.assertEqual(expect,result)
+
+class TestMD_to_HTMLNode(unittest.TestCase):
+    def test_paragraph(self):
+        md = "This is **bolded** paragraph"
+        result = markdown_to_html_node(md)
+        expected = "[HTMLNode(p,None,[HTMLNode(None,This is ,None,None), HTMLNode(b,bolded,None,None), HTMLNode(None, paragraph,None,None)],None)]"
+        expected = f"HTMLNode(div,None,{expected},None)"
+        self.assertEqual(repr(result),expected)
+    def test_heading(self):
+        md = "##### This is a heading\n\n###thisisnot"
+        result = markdown_to_html_node(md)
+        expected = "[HTMLNode(h5,This is a heading,None,None), HTMLNode(p,None,[HTMLNode(None,###thisisnot,None,None)],None)]"
+        expected = f"HTMLNode(div,None,{expected},None)"
+        self.assertEqual(repr(result),expected)
+    def test_code(self):
+        md = "``` This is code ```\n\n```This also```\n\n`Thisnot`"
+        result = markdown_to_html_node(md)
+        expected = "[HTMLNode(pre,None,[HTMLNode(code, This is code ,None,None)],None), HTMLNode(pre,None,[HTMLNode(code,This also,None,None)],None), HTMLNode(p,None,[HTMLNode(code,Thisnot,None,None)],None)]"
+        expected = f"HTMLNode(div,None,{expected},None)"
+        self.assertEqual(repr(result),expected)
+    def test_quote(self):
+        md = ">quote starts here\n>\n>nothing above\n>bye"
+        result = markdown_to_html_node(md)
+        expected = """[HTMLNode(blockquote,quote starts here
+
+nothing above
+bye,None,None)]"""
+        expected = f"HTMLNode(div,None,{expected},None)"
+        self.assertEqual(repr(result),expected)
+    def test_unordered_list(self):
+        md = "* This is a list\n* with items"
+        result = markdown_to_html_node(md)
+        expected = "[HTMLNode(ul,None,[HTMLNode(li,This is a list,None,None), HTMLNode(li,with items,None,None)],None)]"
+        expected = f"HTMLNode(div,None,{expected},None)"
+        self.assertEqual(repr(result),expected)
+    def test_ordered_lsit(self):
+        md = "1.This is a list\n2.with ordered items"
+        result = markdown_to_html_node(md)
+        expected = "[HTMLNode(ol,None,[HTMLNode(li,This is a list,None,None), HTMLNode(li,with ordered items,None,None)],None)]"
+        expected = f"HTMLNode(div,None,{expected},None)"
+        self.assertEqual(repr(result),expected)
