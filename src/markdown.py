@@ -86,7 +86,15 @@ def markdown_to_html_node(markdown):
                 nodes.append(ParentNode("ol",[LeafNode("li",line[2:]) for line in lines]))
     return ParentNode("div",nodes)
 
-
+def extract_md_title(markdown):
+    blocks = markdown_to_blocks(markdown)
+    for block in blocks:
+        type = block_to_block_type(block)
+        if type == BlockTypes.heading:
+            num = block.count("#")
+            if num==1:
+                return block.strip("# ")
+    raise Exception('No title found')
 
 def main():
     md = """
@@ -109,6 +117,6 @@ This is the same paragraph on a new line
     # md = "This is text with a link [to boot dev](https://www.boot.dev) and [to youtube](https://www.youtube.com/@bootdotdev)"
     # md = text = "This is **bold** text with an *italic* word and a `inline code block` and an ![obi wan image](https://i.imgur.com/fJRm4Vk.jpeg) and a [link](https://boot.dev)"
     nodes = markdown_to_html_node(md)
-    print(nodes[0].to_html())
+
 if __name__=="__main__":
     main()

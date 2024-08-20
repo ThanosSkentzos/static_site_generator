@@ -1,7 +1,7 @@
 import unittest
 
 from htmlnode import HTMLNode, LeafNode
-from markdown import block_to_block_type, markdown_to_blocks, markdown_to_html_node
+from markdown import block_to_block_type, extract_md_title, markdown_to_blocks, markdown_to_html_node
 
 class TestMarkdown(unittest.TestCase):
     def test_props_to_html(self):
@@ -18,7 +18,7 @@ This is a paragraph of text. It has some **bold** and *italic* words inside of i
         result = markdown_to_blocks(md)
         self.assertEqual(expected, result)
 
-class TestMarkdownToHTML(unittest.TestCase):
+class TestInlineMarkdownToHTML(unittest.TestCase):
     def test_markdown_to_blocks(self):
         md = """
 This is **bolded** paragraph
@@ -109,7 +109,7 @@ class TestBlockTypes(unittest.TestCase):
         result = block_to_block_type(block)
         self.assertEqual(expect,result)
 
-class TestMD_to_HTMLNode(unittest.TestCase):
+class TestBlocksMarkdownToHTMLNode(unittest.TestCase):
     def test_paragraph(self):
         md = "This is **bolded** paragraph"
         result = markdown_to_html_node(md)
@@ -149,3 +149,11 @@ bye,None,None)]"""
         expected = "[HTMLNode(ol,None,[HTMLNode(li,This is a list,None,None), HTMLNode(li,with ordered items,None,None)],None)]"
         expected = f"HTMLNode(div,None,{expected},None)"
         self.assertEqual(repr(result),expected)
+
+
+class TestExtractors(unittest.TestCase):
+    def test_extract_title(self):
+        md = "# title"
+        result = extract_md_title(md)
+        expected = md.strip("# ")
+        self.assertEqual(result,expected)
