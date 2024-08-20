@@ -72,6 +72,7 @@ def split_nodes_image(old_nodes):
         img_tuples = extract_markdown_images(text)
         if len(img_tuples)==0:
             nodes += [TextNode(text,text_type_text)]
+            continue
         remaining_text = text
         for t in img_tuples:
             alt = t[0]
