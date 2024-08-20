@@ -24,6 +24,7 @@ def block_to_block_type(block):
     num_lines = len(lines)
     first_chars = list(map(lambda x:x[0],lines))
     first_2_chars = list(map(lambda x:x[0:2],lines))
+    first_3_chars = list(map(lambda x:x[0:3],lines))
     num_hash = 0
     if block[0]=="#":
         for c in block:
@@ -40,7 +41,7 @@ def block_to_block_type(block):
         return BlockTypes.quote
     elif radd(first_2_chars) in [num_lines*"* ",num_lines*"- "]:
         return BlockTypes.unordered_list
-    elif radd(first_2_chars) == radd([f"{i+1}." for i in range(num_lines)]):
+    elif radd(first_3_chars) == radd([f"{i+1}. " for i in range(num_lines)]):
         return BlockTypes.ordered_list
     else:
         return BlockTypes.paragraph
@@ -78,12 +79,26 @@ def markdown_to_html_node(markdown):
                 text = block.strip('```')
                 nodes.append(ParentNode("pre",[LeafNode("code",text)]))
             case BlockTypes.quote:
-                quote = "\n".join([line.strip('>') for line in lines])
+                quote = "\n".join([line.strip('> ') for line in lines])
                 nodes.append(LeafNode("blockquote",quote))
             case BlockTypes.unordered_list:
-                nodes.append(ParentNode("ul",[LeafNode("li",line[2:]) for line in lines]))
+                #TODO use textnode because list might have inline markdown
+                u_list = [line[2:] for line in lines]
+                li_nodes = []
+                for txt in u_list:
+                    li_text_nodes = md_text_to_textnodes(txt)
+                    li_html_nodes = list(map(text_node_to_html_node,li_text_nodes))
+                    li_nodes += [ParentNode("li",li_html_nodes)]
+                    # print(nodes)
+                nodes.append(ParentNode("ul",li_nodes))
             case BlockTypes.ordered_list:
-                nodes.append(ParentNode("ol",[LeafNode("li",line[2:]) for line in lines]))
+                o_list = [line[3:] for line in lines]
+                li_nodes = []
+                for txt in o_list:
+                    li_text_nodes = md_text_to_textnodes(txt)
+                    li_html_nodes = list(map(text_node_to_html_node,li_text_nodes))
+                    li_nodes += [ParentNode("li",li_html_nodes)]
+                nodes.append(ParentNode("ol",li_nodes))
     return ParentNode("div",nodes)
 
 def extract_md_title(markdown):
@@ -116,7 +131,11 @@ This is the same paragraph on a new line
 """
     # md = "This is text with a link [to boot dev](https://www.boot.dev) and [to youtube](https://www.youtube.com/@bootdotdev)"
     # md = text = "This is **bold** text with an *italic* word and a `inline code block` and an ![obi wan image](https://i.imgur.com/fJRm4Vk.jpeg) and a [link](https://boot.dev)"
-    nodes = markdown_to_html_node(md)
+    md = "* This is the first list item in a list block with a **bold** word\n* This is a list item with *italic* in it\n* This is another list item"
+    md = "* This is a list\n* with items"
+    md = "1. This is a list\n2. with ordered items"
 
+    nodes = markdown_to_html_node(md)
+    print(nodes.to_html())
 if __name__=="__main__":
     main()

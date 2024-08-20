@@ -140,13 +140,13 @@ bye,None,None)]"""
     def test_unordered_list(self):
         md = "* This is a list\n* with items"
         result = markdown_to_html_node(md)
-        expected = "[HTMLNode(ul,None,[HTMLNode(li,This is a list,None,None), HTMLNode(li,with items,None,None)],None)]"
+        expected = "[HTMLNode(ul,None,[HTMLNode(li,None,[HTMLNode(None,This is a list,None,None)],None), HTMLNode(li,None,[HTMLNode(None,with items,None,None)],None)],None)]"
         expected = f"HTMLNode(div,None,{expected},None)"
         self.assertEqual(repr(result),expected)
     def test_ordered_lsit(self):
-        md = "1.This is a list\n2.with ordered items"
+        md = "1. This is a list\n2. with ordered items"
         result = markdown_to_html_node(md)
-        expected = "[HTMLNode(ol,None,[HTMLNode(li,This is a list,None,None), HTMLNode(li,with ordered items,None,None)],None)]"
+        expected = "[HTMLNode(ol,None,[HTMLNode(li,None,[HTMLNode(None,This is a list,None,None)],None), HTMLNode(li,None,[HTMLNode(None,with ordered items,None,None)],None)],None)]"
         expected = f"HTMLNode(div,None,{expected},None)"
         self.assertEqual(repr(result),expected)
 
